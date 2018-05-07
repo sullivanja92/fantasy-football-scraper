@@ -121,7 +121,7 @@ public class PlayerDataUtils {
 			return Month.MAY;
 		case "Jun":
 			return Month.JUNE;
-		case "July":
+		case "Jul":
 			return Month.JULY;
 		case "Aug":
 			return Month.AUGUST;

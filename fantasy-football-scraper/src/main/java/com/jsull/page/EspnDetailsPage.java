@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import org.openqa.selenium.WebDriver;
 
 import com.jsull.entity.Player;
+import com.jsull.util.PlayerDataUtils;
 
 public class EspnDetailsPage extends Page implements PlayerDetailsScraper {
 	
@@ -19,7 +20,7 @@ public class EspnDetailsPage extends Page implements PlayerDetailsScraper {
 	public static String homeXpath = "//a[@href='http://www.espn.com']";
 	
 	public static final String draftRoundRegex = "(\\d{4}:\\s+)(\\d+\\w{2})";
-	public static final String draftPickRegex = "(, )(\\d{2})(\\w{2})";
+	public static final String draftPickRegex = "(, )(\\d+)(\\w{2})";
 	public static final String draftTeamRegex = "(by\\s+)(\\w+)";
 	
 	public EspnDetailsPage(WebDriver driver) {
@@ -38,7 +39,7 @@ public class EspnDetailsPage extends Page implements PlayerDetailsScraper {
 		p.setCollege(getPlayerCollege());
 		p.setNumber(getPlayerNumber());
 		//p.setDraftInfo(getPlayerDraftInfo());
-		p.setDraftYear(getPlayerDraftYear());
+		p.setDraftYear(getPlayerDraftYear());	// improve this logic -> only check for presence once...
 		p.setDraftRound(getPlayerDraftRound()); 
 		p.setDraftPick(getPlayerDraftPick());
 		p.setDraftTeam(getPlayerDraftTeam());

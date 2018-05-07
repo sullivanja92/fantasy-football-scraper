@@ -64,7 +64,7 @@ public abstract class Page {
 			driver.findElement(By.xpath(xpath));
 			return true;
 		} catch (NoSuchElementException e) {
-			System.err.println(e.getMessage());
+			System.err.println(String.format("xpath: %s is not located on the page", xpath));
 		}
 		return false;
 	}

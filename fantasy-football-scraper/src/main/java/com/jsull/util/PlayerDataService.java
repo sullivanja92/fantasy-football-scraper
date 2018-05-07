@@ -1,11 +1,17 @@
 package com.jsull.util;
 
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 import com.jsull.entity.Player;
+import com.jsull.page.EspnDetailsPage;
+import com.jsull.page.EspnHomePage;
+import com.jsull.page.EspnSearchResultsPage;
+import com.jsull.page.PlayerListPage;
 
 public class PlayerDataService {
 	
@@ -23,9 +29,9 @@ public class PlayerDataService {
 	
 	public void getPlayerDetails(HashSet<Player> players) {
 		EspnHomePage espnPage = new EspnHomePage(this.driver);
+		EspnSearchResultsPage espnSearchResultsPage = null;
+		EspnDetailsPage espnDetailsPage = null;
 		for (Player p : players) {
-			EspnSearchResultsPage espnSearchResultsPage = null;
-			EspnDetailsPage espnDetailsPage = null;
 			try {
 				espnSearchResultsPage = espnPage.searchFor(p.getFirst(), p.getLast());
 				espnDetailsPage = espnSearchResultsPage.getDetailsPage();
@@ -35,44 +41,17 @@ public class PlayerDataService {
 				System.err.println("Error getting player details for: " 
 						+ p.getFirst() + " " + p.getLast());
 				System.err.println(e.getMessage());
-				espnPage.goTo(EspnHomePage.url);
 			}
+			espnDetailsPage.goTo(EspnHomePage.url);
 		}
-	}
-	
-	public int[] getInput(){
-	    boolean rightInput = false;
-	    int[] nothing = {0,0};
-	    while(rightInput == false){
-	      try{
-	       rightInput = true;
-	      int[] XY = {0,0};
-	      String coordinates;
-	      System.out.println("Insert coordinates (x y) and press enter.");
-	      //coordinates = input.nextLine();
-	      coordinates = "";
-	      XY[1] = Character.getNumericValue(coordinates.charAt(0));
-	      XY[0] = Character.getNumericValue(coordinates.charAt(2));
-	      return XY;
-	     }catch(StringIndexOutOfBoundsException se){
-	      System.out.println(se);
-	      System.out.println("Try Again with a space between x and y.");
-	      rightInput =  false;  
-
-	      return nothing;
-	     }
-
-	    }
-	    return null;
-
 	}
 	
 	public static void main(String[] args) {
 		HashSet<Player> players = new HashSet<>();
-		players.add(new Player(1, "Ty", "Montgomery", "RB"));
+		players.add(new Player(1, "Jimmy", "Graham", "QB"));
 		PlayerDataService service = new PlayerDataService(new ChromeDriver());
 		service.getPlayerDetails(players);
-		PlayerDataUtils.createSqlFromSerializedPlayers();
+//		PlayerDataUtils.createSqlFromSerializedPlayers();
 	}
 
 }
