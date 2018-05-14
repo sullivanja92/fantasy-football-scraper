@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.List;
 
 public class Player implements Serializable {
 	
@@ -25,6 +26,7 @@ public class Player implements Serializable {
 	private LocalDate birthDate;
 	private String imageUrl;
 	private int hash;
+	private List<FantasyWeek> fantasyWeeks;
 	
 	public Player() {}
 	
@@ -88,6 +90,14 @@ public class Player implements Serializable {
 	public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl;}
 	public String getImageUrl() { return this.imageUrl; }
 
+	public List<FantasyWeek> getFantasyWeeks() {
+		return fantasyWeeks;
+	}
+
+	public void setFantasyWeeks(List<FantasyWeek> fantasyWeeks) {
+		this.fantasyWeeks = fantasyWeeks;
+	}
+
 	public void setHash(int hash) { this.hash = hash; }
 	public int getHash() { return this.hash; }
 	
@@ -131,14 +141,15 @@ public class Player implements Serializable {
 			return false;
 		if (!p.getLast().equals(this.last))
 			return false;
-		if (!p.getPosition().equals(this.position))
-			return false;
+//		if (!p.getPosition().equals(this.position))
+//			return false;
 		return true;
 	}
 	
 	@Override
 	public int hashCode() {
-		return (this.first + this.last + this.position).hashCode();
+		//return (this.first + this.last + this.position).hashCode();
+		return (this.first + this.last).hashCode();
 	}
 
 }

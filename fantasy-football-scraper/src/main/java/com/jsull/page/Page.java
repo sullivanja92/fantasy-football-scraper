@@ -8,6 +8,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public abstract class Page {
@@ -47,6 +48,12 @@ public abstract class Page {
 		WebElement element = this.wait.until(ExpectedConditions.presenceOfElementLocated(By.linkText(text)));
 		element.click();
 		return element;
+	}
+	
+	public Select clickSelectWithXpathByText(String xpath, String text) {
+		Select select = new Select(this.driver.findElement(By.xpath(xpath)));
+		select.selectByVisibleText(text);
+		return select;
 	}
 	
 	public ArrayList<WebElement> collectElementsByXpath(String xpath) {

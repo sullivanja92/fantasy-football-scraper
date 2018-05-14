@@ -1,8 +1,7 @@
 package com.jsull.util;
 
 import java.util.HashSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Map;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -11,7 +10,7 @@ import com.jsull.entity.Player;
 import com.jsull.page.EspnDetailsPage;
 import com.jsull.page.EspnHomePage;
 import com.jsull.page.EspnSearchResultsPage;
-import com.jsull.page.PlayerListPage;
+import com.jsull.page.FantasyWeekPage;
 
 public class PlayerDataService {
 	
@@ -22,9 +21,11 @@ public class PlayerDataService {
 		this.driver = driver;
 	}
 	
-	public HashSet<Player> getPlayerDataByWeek(int start, int numWeeks) {
-		PlayerListPage listPage = new PlayerListPage(this.driver);
-		return listPage.scrapePlayerDataByWeek(start, numWeeks);
+	public Map<String, Player> scrapePlayerDataByWeek(int start, int numWeeks) {
+		FantasyWeekPage listPage = new FantasyWeekPage(this.driver);
+		Map<String, Player> players = listPage.scrapePlayerData(start, numWeeks);
+		String fileName = PlayerDataUtils.serializePlayers(players);
+		return listPage.scrapePlayerData(start, numWeeks);
 	}
 	
 	public void getPlayerDetails(HashSet<Player> players) {

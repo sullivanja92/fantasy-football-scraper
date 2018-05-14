@@ -13,13 +13,51 @@ import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 import com.jsull.entity.Player;
 
 public class PlayerDataUtils {
 	
 	public static final String FILE = "players.ser";
+	
+	public static String serializePlayers(Map<String, Player> players) {
+		String fileName = generateFileName(FILE);
+		ObjectOutputStream oos = null;
+		try {
+			File file = new File(fileName);
+			if (!file.exists())
+				file.createNewFile();
+			oos = new ObjectOutputStream(new FileOutputStream(file));
+			oos.writeObject(players);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (oos != null) {
+				try {
+					oos.flush();
+					oos.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return fileName;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Map<String, Player> readSerializedPlayers(String fileName) {
+		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(fileName)))) {
+			Map<String, Player> players = (Map<String, Player>) ois.readObject();
+			return players;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 	@SuppressWarnings("unchecked")
 	public static boolean writePlayerToFile(Player p) {
@@ -29,13 +67,13 @@ public class PlayerDataUtils {
 		ObjectInputStream objectInputStream = null;
 		try {
 			file = new File(FILE);
-			HashSet<Player> players = null;
+			List<Player> players = null;
 			if (!file.exists()) {
 				file.createNewFile();
-				players = new HashSet<>();
+				players = new ArrayList<>();
 			} else {
 				objectInputStream = new ObjectInputStream(new FileInputStream(file));
-				players = (HashSet<Player>) objectInputStream.readObject();
+				players = (List<Player>) objectInputStream.readObject();
 			}
 			players.add(p);
 			objectOutputStream = new ObjectOutputStream(new FileOutputStream(file));
