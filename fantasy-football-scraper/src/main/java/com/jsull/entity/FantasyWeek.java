@@ -8,8 +8,8 @@ public class FantasyWeek {
 	private double yahooSalary;
 	private int week;
 	private int year;
-	//private Player player;
-	//private Game game;
+	private Player player;
+	private Game game;
 	
 	public FantasyWeek() {}
 
@@ -31,11 +31,11 @@ public class FantasyWeek {
 	public int getYear() { return this.year; }
 	public void setYear(int year) { this.year = year; }
 	
-//	public Player getPlayer() { return this.player; }
-//	public void setPlayer(Player player) { this.player = player; }
-//	
-//	public Game getGame() { return this.game; }
-//	public void setGame(Game game) { this.game = game; }
+	public Player getPlayer() { return this.player; }
+	public void setPlayer(Player player) { this.player = player; }
+	
+	public Game getGame() { return this.game; }
+	public void setGame(Game game) { this.game = game; }
 	@Override
 	public String toString() {
 		return String.format("Year: %d\nWeek: %d\nDraftkings: %f\nFanDuel: %f\nYahoo: %f", year, week, draftkingsSalary, fanduelSalary, yahooSalary);

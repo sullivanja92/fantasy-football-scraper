@@ -1,4 +1,4 @@
-package com.jsull.page;
+package com.jsull.document;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,13 +15,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public abstract class JsoupParser {
+public abstract class JsoupExtractor {
 	
 	protected Document doc;
 	public static final String USER_AGENT_HEADER = "Mozilla/5.0 (Windows NT 6.1; WOW64) "
 			+ "AppleWebKit/537.36 (KHTML, linke Gecko) Chrome/62.0.3202.75 Safari/537.36";
 	
-	public JsoupParser(String url) {
+	public JsoupExtractor(String url) {
 		try {
 			URL u = new URL(url);
 			HttpURLConnection conn = (HttpURLConnection) u.openConnection();
@@ -85,6 +85,34 @@ public abstract class JsoupParser {
 	
 	public Attributes getAttributesBelongingTo(Element e) {
 		return e.attributes();
+	}
+	
+	public Element getChildElementContainingText(Elements elements, String text) {
+		for (Element e : elements.get(0).children()) {
+			if (e.text().contains(text))
+				return e;
+		}
+		return null;
+	}
+	
+	public Element getChildElementByClass(Elements elements, String name) {
+		for (Element e : elements.get(0).children()) {
+			if (e.classNames().contains(name))
+				return e;
+		}
+		return null;
+	}
+	
+	public Element getParentElementByOwnText(String text) {
+		Elements els = this.doc.getElementsContainingOwnText(text);
+		Element e = els.get(0);
+		return e.parent();
+	}
+	
+	public Element getParentByCSSQuery(String query) {
+		Elements els = this.doc.select(query);
+		Element e = els.get(0);
+		return e.parent();
 	}
 	
 	public String getAttributeValue(Element e, String attribute) {

@@ -1,4 +1,4 @@
-package com.jsull.page;
+package com.jsull.document;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,7 +19,13 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
-public class GamePageDocument extends JsoupParser {
+import com.jsull.entity.Game;
+import com.jsull.entity.GameStats;
+import com.jsull.entity.PassDetails;
+import com.jsull.entity.Player;
+import com.jsull.entity.RushDetails;
+
+public class GamePageDocument extends JsoupExtractor {
 	
 	public static final String ELEMENT_WEEK_TEXT = "All Week";
 	public static final String GAME_SCORE_CLASS = "score";
@@ -37,25 +43,23 @@ public class GamePageDocument extends JsoupParser {
 		for (Element e : elements) {
 			for (Node n : e.childNodes()) {
 				if (n instanceof Comment) {
-					//String text = ((Comment) n).getData();
-					//if (text.contains(PLAYER_OFFENSE_TABLE_ID))
-						comments.add((Comment) n);
+					comments.add((Comment) n);
 				}
 			}
 		}
 	}
 	
-	public Game getGameDetails() {
+	public Game getGame() {
 		Game game = new Game();
-		game.week = getGameWeek();
+		game.setWeek(getGameWeek());
 		Map<String, String> teams = getTeams();
-		game.home = teams.get("home");
-		game.away = teams.get("away");
+		game.setHome(teams.get("home"));
+		game.setAway(teams.get("away"));
 		Map<String, Integer> scoreMap = getScore();
-		game.homeScore = scoreMap.get("home");
-		game.awayScore = scoreMap.get("away");
-		game.time = getGameTime();
-		game.date = getGameDate();
+		game.setHomeScore(scoreMap.get("home"));
+		game.setAwayScore(scoreMap.get("away"));
+		game.setTime(getGameTime());
+		game.setDate(getGameDate());
 		return game;
 	}
 
@@ -147,37 +151,36 @@ public class GamePageDocument extends JsoupParser {
 		return d;
 	}
 	
-	public List<Player> getPlayers() {
-		Game game = getGameDetails();
-		List<Player> players = new ArrayList<>();
+	public Map<String, GameStats> getGameStats() {
+		Map<String, GameStats> map = new HashMap<>();
 		Document table = Jsoup.parse(this.comments.get(0).getData());
-		Elements elements = table.getElementsByTag("tr");
-		String currentTeam = game.away;
+		Elements rows = table.getElementsByTag("tr");
+		Map<String, String> teams = getTeams();
+		String currentTeam = teams.get("away");
 		int i=0;
-		for (Element e : elements) {
-			Player p = null;
+		for (Element row : rows) {
+			String name = null;
+			GameStats gameStats = null;
 			try {
-				// method to check name should go here, if not needed, i++ and cont
-				p = extractPlayerFromRow(e);
-				p.stats.team = currentTeam;
-				p.stats.game = game;
+				name = getPlayerNameFromRow(row);
+				gameStats = getGameStatsFromRow(row);
 			} catch (Exception ex) {
 				System.err.println(ex.getMessage());
 			}
-			if (p != null)
-				players.add(p);
+			if (name != null && gameStats != null)
+				map.put(name, gameStats);
 			if (i >= 2) {
-				if (e.getElementsByTag("td").size() == 0) 
-					currentTeam = game.home;
+				if (row.getElementsByTag("td").size() == 0) 
+					currentTeam = teams.get("home");
 			}
 			i++;
 		}
-		return players;
+		return map;
 	}
 	
-	public String[] getPlayerNameArrFromRow(Element e) {
+	public String getPlayerNameFromRow(Element e) {
 		String[] nameArr = e.select("a[href]").text().split(" ");
-		return nameArr;
+		return nameArr[0] + " " + nameArr[1];
 	}
 	
 	private boolean isPlayerRow(Element e) {
@@ -196,14 +199,10 @@ public class GamePageDocument extends JsoupParser {
 		return e.getElementsByTag("td");
 	}
 	
-	private Player extractPlayerFromRow(Element e) throws Exception {
-		Player p = new Player();
-		if (!isPlayerRow(e))
-			throw new Exception("This row: " + e + " is not a player row.");
-		String[] nameArr = e.select("a[href]").text().split(" ");
-		p.first = nameArr[0];
-		p.last = nameArr[1];
-		Elements cells = getAllCellsFromRow(e);
+	private GameStats getGameStatsFromRow(Element row) throws Exception { 
+		if (!isPlayerRow(row))
+			throw new Exception("This row: " + row + " is not a player row.");
+		Elements cells = getAllCellsFromRow(row);
 		GameStats stats = new GameStats();
 		for (Element c : cells) {
 			Attributes a = c.attributes();
@@ -216,210 +215,252 @@ public class GamePageDocument extends JsoupParser {
 			}
 			switch (data) {
 			case "pass_cmp" :
-				stats.completions = val;
+				stats.setPassCompletions(val);
 				break;
 			case "pass_att":
-				stats.passAttempts = val;
+				stats.setPassAttempts(val);
 				break;
 			case "pass_yds":
-				stats.passYards = val;
+				stats.setPassYards(val);
 				break;
 			case "pass_td":
-				stats.passTouchdowns = val;
+				stats.setPassTouchdowns(val);
 				break;
 			case "pass_int":
-				stats.interceptions = val;
+				stats.setInterceptions(val);
 				break;
 			case "pass_sacked":
-				stats.sacks = val;
+				stats.setSacksTaken(val);
 				break;
 			case "pass_sacked_yds":
-				stats.sackYards = val;
+				stats.setSackYards(val);
 				break;
 			case "pass_long":
-				stats.passLong = val;
+				stats.setPassLong(val);
 				break;
 			case "rush_Att":
-				stats.rushAttempts = val;
+				stats.setRushAttempts(val);
 				break;
 			case "rush_yds":
-				stats.rushYards = val;
+				stats.setRushYards(val);
 				break;
 			case "rush_td":
-				stats.rushTouchdowns = val;
+				stats.setRushTouchdowns(val);
 				break;
 			case "rush_long":
-				stats.rushLong = val;
+				stats.setRushLong(val);
 				break;
 			case "targets":
-				stats.targets = val;
+				stats.setTargets(val);
 				break;
 			case "rec":
-				stats.receptions = val;
+				stats.setReceptions(val);
 				break;
 			case "rec_yds":
-				stats.recYards = val;
+				stats.setReceptionYards(val);
 				break;
 			case "rec_td":
-				stats.recTouchdowns = val;
+				stats.setReceptionTouchdowns(val);
 				break;
 			case "rec_long":
-				stats.recLong = val;
+				stats.setReceptionLong(val);
 				break;
 			case "fumbles":
-				stats.fmbl = val;
+				stats.setFumbles(val);
 				break;
 			case "fumbles_lost":
-				stats.fl = val;
+				stats.setFumblesLost(val);
 				break;
 			}
 		}
-		p.stats = stats;
-		return p;
+		return stats;
 	}
 	
-	public void extractPlayerRushDetails(List<Player> players) {
+	public Map<String, RushDetails> extractPlayerRushDetails() {
 		Document table = getTableFromCommentsById(PLAYER_RUSH_TABLE_ID);
 		Elements rows = getAllRowsFromTable(table);
+		Map<String, RushDetails> map = new HashMap<>();
 		for (Element row : rows) {
 			if (isPlayerRow(row)) {
-				String[] nameArr = getPlayerNameArrFromRow(row);
-				System.out.println("\n" + nameArr[0] + " " + nameArr[1]);
-				// check if player in set and point, if not continue
-				Elements cells= getAllCellsFromRow(row);
+				String name = getPlayerNameFromRow(row);
 				RushDetails rushDetails = new RushDetails();
+				Elements cells= getAllCellsFromRow(row);
 				for (Element cell : cells) {
 					if (!cell.hasText())
 						continue;
 					if (!isCellValueNumeric(cell))
 						continue;
-					int n = Integer.parseInt(cell.text());
+					int val = Integer.parseInt(cell.text());
 					Attributes attributes = cell.attributes();
 					String data = attributes.get("data-stat");
-					System.out.println(data + " " + n);;
 					switch (data) {
 					case "rush_le":
+						rushDetails.setRushAttLeftEnd(val);
 						break;
 					case "rush_yds_le":
+						rushDetails.setRushYardsLeftEnd(val);
 						break;
 					case "rush_td_le":
+						rushDetails.setRushTdLeftEnd(val);
 						break;
 					case "rush_lt":
+						rushDetails.setRushAttLeftTackle(val);
 						break;
 					case "rush_yds_lt":
+						rushDetails.setRushYardsLeftTackle(val);
 						break;
 					case "rush_td_lt":
+						rushDetails.setRushTdLeftTackle(val);
 						break;
 					case "rush_lg":
+						rushDetails.setRushAttLeftGuard(val);
 						break;
 					case "rush_yds_lg":
+						rushDetails.setRushYardsLeftGuard(val);
 						break;
 					case "rush_td_lg":
+						rushDetails.setRushTdLeftGuard(val);
 						break;
 					case "rush_md":
+						rushDetails.setRushAttMid(val);
 						break;
 					case "rush_yds_md":
+						rushDetails.setRushYardsMid(val);
 						break;
 					case "rush_td_md":
+						rushDetails.setRushTdMid(val);
 						break;
 					case "rush_rg":
+						rushDetails.setRushAttRightGuard(val);
 						break;
 					case "rush_yds_rg":
+						rushDetails.setRushYardsRightGuard(val);
 						break;
 					case "rush_td_rg":
+						rushDetails.setRushTdRightGuard(val);
 						break;
 					case "rush_rt":
+						rushDetails.setRushAttRightTackle(val);
 						break;
 					case "rush_yds_rt":
+						rushDetails.setRushYardsRightTackle(val);
 						break;
 					case "rush_td_rt":
+						rushDetails.setRushTdRightTackle(val);
 						break;
 					case "rush_re":
+						rushDetails.setRushAttRightEnd(val);
 						break;
 					case "rush_yds_re":
+						rushDetails.setRushYardsRightEnd(val);
 						break;
 					case "rush_td_re":
+						rushDetails.setRushTdRightEnd(val);
 						break;
 					}
 				}
-				//p.gameStats.rushDetails = rushDetails;
+				map.put(name, rushDetails);
 			}
 		}
+		return map;
 	}
 	
-	public void extractPlayerPassDetails(List<Player> players) {
+	public Map<String, PassDetails> extractPlayerPassDetails() {
 		Document table = getTableFromCommentsById(PLAYER_PASS_TABLE_ID);
 		Elements rows = getAllRowsFromTable(table);
+		Map<String, PassDetails> map = new HashMap<>();
 		for (Element row : rows) {
 			if (isPlayerRow(row)) {
-				String[] nameArr = getPlayerNameArrFromRow(row);
-				System.out.println("\n" + nameArr[0] + " " + nameArr[1]);
-				// check if player in list
-				Elements cells = getAllCellsFromRow(row);
+				String name = getPlayerNameFromRow(row);
 				PassDetails passDetails = new PassDetails();
+				Elements cells = getAllCellsFromRow(row);
 				for (Element cell : cells ) {
 					if (!cell.hasText())
 						continue;
 					if (!isCellValueNumeric(cell))
 						continue;
-					int n = Integer.parseInt(cell.text());
+					int val = Integer.parseInt(cell.text());
 					Attributes attributes = cell.attributes();
 					String data = attributes.get("data-stat");
-					System.out.println(data + " " + n);
 					switch(data) {
 					case "rec_targets_sl":
+						passDetails.setRecTargetsShortLeft(val);
 						break;
 					case "rec_catches_sl":
+						passDetails.setRecCatchesShortLeft(val);
 						break;
 					case "rec_yds_sl":
+						passDetails.setRecYardsShortLeft(val);
 						break;
 					case "rec_td_sl":
+						passDetails.setRecTdShortLeft(val);
 						break;
 					case "rec_targets_sm":
+						passDetails.setRecTargetsShortMiddle(val);
 						break;
 					case "rec_catches_sm":
+						passDetails.setRecCatchesShortMiddle(val);
 						break;
 					case "rec_yds_sm":
+						passDetails.setRecYardsShortMiddle(val);
 						break;
 					case "rec_td_sm":
+						passDetails.setRecTdShortMiddle(val);
 						break;
 					case "rec_targets_sr":
+						passDetails.setRecTargetsShortRight(val);
 						break;
 					case "rec_catches_sr":
+						passDetails.setRecCatchesShortRight(val);
 						break;
 					case "rec_yds_sr":
+						passDetails.setRecYardsShortRight(val);
 						break;
 					case "rec_td_sr":
+						passDetails.setRecTdShortRight(val);
 						break;
 					case "rec_targets_dl":
+						passDetails.setRecTargetsDeepLeft(val);
 						break;
 					case "rec_catches_dl":
+						passDetails.setRecCatchesDeepLeft(val);
 						break;
 					case "rec_yds_dl":
+						passDetails.setRecYardsDeepLeft(val);
 						break;
 					case "rec_td_dl":
+						passDetails.setRecTdDeepLeft(val);
 						break;
 					case "rec_targets_dm":
+						passDetails.setRecTargetsDeepMiddle(val);
 						break;
 					case "rec_catches_dm":
+						passDetails.setRecCatchesDeepMiddle(val);
 						break;
 					case "rec_yds_dm":
+						passDetails.setRecYardsDeepMiddle(val);
 						break;
 					case "rec_td_dm":
+						passDetails.setRecTdDeepMiddle(val);
 						break;
 					case "rec_targets_dr":
+						passDetails.setRecTargetsDeepRight(val);
 						break;
 					case "rec_catches_dr":
+						passDetails.setRecCatchesDeepRight(val);
 						break;
 					case "rec_yds_dr":
+						passDetails.setRecYardsDeepRight(val);
 						break;
 					case "rec_td_dr":
+						passDetails.setRecTdDeepRight(val);
 						break;
 					}
 				}
-				//p.gameStats.passDetails = passDetails;
+				map.put(name, passDetails);
 			}
 		}
+		return map;
 	}
 	
 	private boolean isCellValueNumeric(Element e) {

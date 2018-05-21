@@ -34,11 +34,12 @@ public class FantasyWeekPage extends Page {
 		goTo(playerListUrl);
 	}
 		
-	public Map<String, Player> scrapePlayerData(int startWeek, int numWeeks) {	// move methods like these to 'FantasyWeekPage Exraction' class
+	public Map<String, Player> scrapePlayerData(int startWeek, int numWeeks) {	// move methods like these to 'FantasyWeekPage Extraction' class
 		int year = 2017; // todo -> allow for different year also throw meaningful exception messages
 		Map<String, Player> players = new HashMap<>();
 		for (int i=startWeek; i<startWeek + numWeeks; i++) {
-			for (String game : fantasyGames) {
+			//for (String game : fantasyGames) {
+			String game = "DraftKings";
 				clickSelectWithXpathByText(selectXpath, game);
 				clickByLinkText(getWeekLinkText(i));
 				ArrayList<WebElement> rows = getPlayerRows();
@@ -51,6 +52,8 @@ public class FantasyWeekPage extends Page {
 							continue;
 						double salary = getSalaryFromRow(row);
 						if (validatePlayerNameVal(player)) {
+							if (!player.contains(","))
+								continue;
 							String[] nameArr = player.split(",");
 							String first = nameArr[1].trim();
 							String last = nameArr[0].trim();
@@ -95,7 +98,7 @@ public class FantasyWeekPage extends Page {
 							} 
 						}				
 					} catch (Exception e) {
-						e.printStackTrace();
+						System.err.println(e + " for row: " + row.getText());
 						try {
 							position = getPositionFromRow(row);
 							if (QB_STRING.equals(position)) {
@@ -108,11 +111,11 @@ public class FantasyWeekPage extends Page {
 								position = "TE";
 							}
 						} catch (Exception ex) {
-							System.err.println("Row: " + row.getText() + " is not player or position row");
+							//System.err.println("Row: " + row.getText() + " is not player or position row");
 						}
 					}
 			}	
-			}
+			//}
 		}
 		return players;
 	}

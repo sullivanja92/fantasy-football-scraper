@@ -1,4 +1,4 @@
-package com.jsull.page;
+package com.jsull.document;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class GameListPageDocument extends JsoupParser {
+public class GameListPageDocument extends JsoupExtractor {
 	
 	public static final String BASE_URL = "https://www.pro-football-reference.com";
 	public static final String GAME_LINK_LOCATOR = "Final";

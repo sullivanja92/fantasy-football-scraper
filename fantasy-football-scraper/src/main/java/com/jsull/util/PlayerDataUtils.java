@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,57 @@ import com.jsull.entity.Player;
 
 public class PlayerDataUtils {
 	
-	public static final String FILE = "players.ser";
+	public static final String FILE = "players.ser";			// create enum for bases
+	public static final String LINK_FILE_NAME = "espn_links.ser";
+		
+	public static void main(String[] args) {
+		Player p = new Player();
+		p.setFirst("Josh");
+		p.setLast("Sullivan");
+		p.setPosition("Linebacker");
+		Map<String, Player> players = new HashMap<>();
+		players.put("Josh Sullivan", p);
+		String filename = serializePlayers(players);
+		Map<String, Player> p2 = readSerializedPlayers(filename);
+		for (Map.Entry<String, Player> entry : p2.entrySet()) {
+			System.out.println(entry.getValue());
+		}
+	}
+	
+	public static String serializeLinks(Map<String, String> links) {
+		String fileName = generateFileName(LINK_FILE_NAME);
+		ObjectOutputStream oos = null;
+		try {
+			File file = new File(fileName);
+			if (!file.exists())
+				file.createNewFile();
+			oos = new ObjectOutputStream(new FileOutputStream(file));
+			oos.writeObject(links);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (oos != null) {
+				try {
+					oos.flush();
+					oos.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return fileName;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Map<String, String> readSerializedLinks(String fileName) {
+		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(fileName)))) {
+			Map<String, String> links = (Map<String, String>) ois.readObject();
+			return links;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 	public static String serializePlayers(Map<String, Player> players) {
 		String fileName = generateFileName(FILE);
@@ -49,7 +100,7 @@ public class PlayerDataUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public Map<String, Player> readSerializedPlayers(String fileName) {
+	public static Map<String, Player> readSerializedPlayers(String fileName) {
 		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(fileName)))) {
 			Map<String, Player> players = (Map<String, Player>) ois.readObject();
 			return players;

@@ -118,17 +118,26 @@ public class Player implements Serializable {
 				this.draftYear, this.draftRound, this.draftPick, this.draftTeam, this.birthDate, this.imageUrl).replace("'null'", "null");
 	}
 	
+	public FantasyWeek getFantasyWeekByWeekNum(int num) {
+		for (int i=0; i<this.fantasyWeeks.size(); i++) {
+			if (this.fantasyWeeks.get(i).getWeek() == num)
+				return this.fantasyWeeks.get(i);
+		}
+		return null;
+	}
+	
 	@Override
 	public String toString() {
 		return String.format("***************************************"
 				+ "\nName: %s\nPosition: %s\nFeet: %d\nInches: %d\nWeight: %d\nCollege: %s\n"
 				+ "Number: %d\nDraft Year: %s\nDraft Round: %s\nDraft Pick: %d\nDraft Team: %s\n" + 
-				"Birthdate: %s\nImage: %s\nHash: %s\n" + 
+				//"Birthdate: %s\nImage: %s\nHash: %s\n" + 
+				"Hash: %s\n" + 
 				"***************************************", 
 				this.first + " " + this.last, this.position, this.feet, this.inches, 
 				this.weight, this.college, this.number, //this.draftInfo, 
 				this.draftYear, this.draftRound, this.draftPick, this.draftTeam,
-				this.birthDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)), this.imageUrl,
+				//this.birthDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)), this.imageUrl,
 				(this.first + this.last + this.position).hashCode());
 	}
 	
