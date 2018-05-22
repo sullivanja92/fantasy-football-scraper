@@ -1,4 +1,4 @@
-package com.jsull.document;
+package com.jsull.document.extractor;
 
 import java.util.Arrays;
 import java.util.List;
@@ -6,18 +6,19 @@ import java.util.List;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.jsull.document.JsoupExtractor;
 import com.jsull.entity.Player;
 
-public class GoogleSearchDocument extends JsoupExtractor {
+public class GoogleSearchDocumentExtractor extends JsoupExtractor {
 	
 	public static final String BASE_URL = "https://www.google.com/search?";
 	public static final String URL_SEARCH_TAG = "a";
 	
-	public GoogleSearchDocument(String url) {
+	public GoogleSearchDocumentExtractor(String url) {
 		super(url);
 	}
 	
-	public GoogleSearchDocument(Player p) {
+	public GoogleSearchDocumentExtractor(Player p) {
 		super(generateGoogleSearchLinkForPlayer(p));
 	}
 

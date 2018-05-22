@@ -7,10 +7,10 @@ import java.util.Map;
 
 import org.openqa.selenium.chrome.ChromeDriver;
 
-import com.jsull.document.EspnPlayerPageDocument;
-import com.jsull.document.GameListPageDocument;
-import com.jsull.document.GamePageDocument;
-import com.jsull.document.GoogleSearchDocument;
+import com.jsull.document.extractor.GamePageDocumentExtractor;
+import com.jsull.document.extractor.GoogleSearchDocumentExtractor;
+import com.jsull.document.parser.EspnPlayerPageDocumentParser;
+import com.jsull.document.parser.GameListPageDocumentParser;
 import com.jsull.entity.FantasyWeek;
 import com.jsull.entity.Game;
 import com.jsull.entity.GameStats;
@@ -19,14 +19,14 @@ import com.jsull.entity.Player;
 import com.jsull.entity.RushDetails;
 import com.jsull.util.PlayerDataUtils;
 
-public class Service {
+public class Process {
 	
 	public String getEspnLinkForPlayer(String first, String last) {
 		Player p = new Player();
 		p.setFirst(first);
 		p.setLast(last);
-		String googleLink = GoogleSearchDocument.generateGoogleSearchLinkForPlayer(p);
-		GoogleSearchDocument g = new GoogleSearchDocument(googleLink);
+		String googleLink = GoogleSearchDocumentExtractor.generateGoogleSearchLinkForPlayer(p);
+		GoogleSearchDocumentExtractor g = new GoogleSearchDocumentExtractor(googleLink);
 		return g.getEspnLinkForPlayer(p);
 	}
 	
@@ -48,7 +48,7 @@ public class Service {
 		Map<String, String> espnLinkMap = new HashMap<>();
 		for (Map.Entry<String, Player> entry : players.entrySet()) {
 			Player p = entry.getValue();
-			GoogleSearchDocument gsd = new GoogleSearchDocument(p);
+			GoogleSearchDocumentExtractor gsd = new GoogleSearchDocumentExtractor(p);
 			String espnUrl = gsd.getEspnLinkForPlayer();
 			String name = p.getFirst() + " " + p.getLast();
 			espnLinkMap.put(name, espnUrl);
@@ -61,18 +61,18 @@ public class Service {
 		for (Map.Entry<String, Player> entry : players.entrySet()) {
 			Player p = entry.getValue();
 			String espnUrl = links.get(p.getFirst() + " " + p.getLast());
-			EspnPlayerPageDocument espnPlayerPage = new EspnPlayerPageDocument(espnUrl);
-			espnPlayerPage.getPlayerDetails(p);
+			EspnPlayerPageDocumentParser espnPlayerPageParser = new EspnPlayerPageDocumentParser(espnUrl);
+			espnPlayerPageParser.setPlayerDetailsFor(p);
 			System.out.println(p);
 		}
 		List<String> gameUrls = new ArrayList<>();
 		for (int i=startWeek; i<startWeek+numWeeks; i++)  {
-			String gameListUrl = GameListPageDocument.getGameListUrlByYearAndWeek(2017, i);
-			GameListPageDocument glpd = new GameListPageDocument(gameListUrl);
-			gameUrls.addAll(glpd.getGameUrls());
+			String gameListUrl = GameListPageDocumentParser.getGameListUrlByYearAndWeek(2017, i);
+			GameListPageDocumentParser gameListPage = new GameListPageDocumentParser(gameListUrl);
+			gameUrls.addAll(gameListPage.getGameUrls());
 		}
 		for (String gameUrl : gameUrls) {
-			GamePageDocument gpd = new GamePageDocument(gameUrl);
+			GamePageDocumentExtractor gpd = new GamePageDocumentExtractor(gameUrl);
 			Game game = gpd.getGame();
 			Map<String, GameStats> gameStatsMap = gpd.getGameStats();		// consider storing these in Map<Map<String, Stats>>
 			Map<String, RushDetails> rushDetailsMap = gpd.extractPlayerRushDetails();

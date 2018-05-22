@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attribute;
@@ -45,7 +47,7 @@ public abstract class JsoupExtractor {
 		
 	}
 
-	public Elements extractElementsByTag(Elements elements, String tag) {
+	public Elements filterElementsByTag(Elements elements, String tag) {
 		elements.removeIf((Element e) -> !e.tag().getName().equals(tag));
 		return elements;
 	}
@@ -78,6 +80,10 @@ public abstract class JsoupExtractor {
 		return this.doc.getElementsMatchingOwnText(regex);
 	}
 	
+	public Elements selectFromElementByQuery(Element e, String query) {
+		return e.select(query);
+	}
+	
 	public String getAttributeValueBelongingTo(Element e, String attribute) {
 		Attributes a = e.attributes();
 		return a.get(attribute);
@@ -85,6 +91,29 @@ public abstract class JsoupExtractor {
 	
 	public Attributes getAttributesBelongingTo(Element e) {
 		return e.attributes();
+	}
+	
+	public Attribute getAttributeFromElementByName(Element e, String name) {
+		Attributes attributes = e.attributes();
+		for (Attribute attribute : attributes) {
+			if (attribute.getKey().equals(name))
+				return attribute;
+		}
+		return null;
+	}
+	
+	public List<Attribute> extractAttributesFromElementsByName(Elements elements, String name) {
+		List<Attribute> attributesList = new ArrayList<>();
+		for (Element e : elements) {
+			Attributes attributes = e.attributes();
+			for (Attribute a : attributes) {
+				if (a.getKey().equals(name)) {
+					attributesList.add(a);
+					break;
+				}
+			}
+		}
+		return attributesList;
 	}
 	
 	public Element getChildElementContainingText(Elements elements, String text) {

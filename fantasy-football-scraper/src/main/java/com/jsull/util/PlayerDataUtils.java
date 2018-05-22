@@ -39,7 +39,7 @@ public class PlayerDataUtils {
 			System.out.println(entry.getValue());
 		}
 	}
-	
+		
 	public static String serializeLinks(Map<String, String> links) {
 		String fileName = generateFileName(LINK_FILE_NAME);
 		ObjectOutputStream oos = null;

@@ -3,7 +3,7 @@ package com.jsull.gui;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.jsull.page.Service;
+import com.jsull.page.Process;
 
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
@@ -89,7 +89,7 @@ public class UrlGui extends Application {
 							public void run() {
 								urlField.clear();
 								if (!firstTextField.getText().equals("") && !lastTextField.getText().equals("")) {
-									Service service = new Service();
+									Process service = new Process();
 									String first = firstTextField.getText().trim();
 									String last = lastTextField.getText().trim();
 									String url = service.getEspnLinkForPlayer(first, last);

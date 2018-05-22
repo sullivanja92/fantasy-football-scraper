@@ -1,4 +1,4 @@
-package com.jsull.document;
+package com.jsull.document.extractor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,15 +19,17 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
+import com.jsull.document.JsoupExtractor;
 import com.jsull.entity.Game;
 import com.jsull.entity.GameStats;
 import com.jsull.entity.PassDetails;
-import com.jsull.entity.Player;
 import com.jsull.entity.RushDetails;
 
-public class GamePageDocument extends JsoupExtractor {
+public class GamePageDocumentExtractor extends JsoupExtractor {
 	
 	public static final String ELEMENT_WEEK_TEXT = "All Week";
+	public static final String TEAM_NAME_ATTRIBUTE_KEY = "itemprop";
+	public static final String TEAM_NAME_ATTRIBUTE_VALUE = "name";
 	public static final String GAME_SCORE_CLASS = "score";
 	public static final String GAME_TIME_REGEX = ":\\s*\\d+:\\d{2}[a|p]m.*";
 	public static final String GAME_DATE_REGEX = "\\w{6,9}\\s\\w{3}\\s\\d+,\\s\\d{4}";
@@ -37,7 +39,7 @@ public class GamePageDocument extends JsoupExtractor {
 	
 	private List<Comment> comments = new ArrayList<>();
 	
-	public GamePageDocument(String url) {
+	public GamePageDocumentExtractor(String url) {
 		super(url);
 		Elements elements = this.doc.getAllElements();
 		for (Element e : elements) {
@@ -49,6 +51,7 @@ public class GamePageDocument extends JsoupExtractor {
 		}
 	}
 	
+	// can remove
 	public Game getGame() {
 		Game game = new Game();
 		game.setWeek(getGameWeek());
@@ -63,20 +66,35 @@ public class GamePageDocument extends JsoupExtractor {
 		return game;
 	}
 
+	// can remove
 	public int getGameWeek() {
 		Elements els = getElementsByAttributeValueStartingWith("data-label", ELEMENT_WEEK_TEXT);
 		return getWeekNumFromAttributeValue(els.get(0));
 	}
 	
+	public Elements getGameWeekElements() {
+		Elements els = getElementsByAttributeValueStartingWith("data-label", ELEMENT_WEEK_TEXT);
+		return els;
+	}
+	
+	// can remove
 	public Map<String, String> getTeams() {
 		Map<String, String> teams = new HashMap<>();
 		Elements els = getElementsByAttributeValueEqualing("itemprop", "name");
-		els = extractElementsByTag(els, "a");
+		els = filterElementsByTag(els, "a");
 		teams.put("home",  convertFullTeamNameToNickname(els.get(0)));
 		teams.put("away", convertFullTeamNameToNickname(els.get(1)));
 		return teams;
 	}
 	
+	public Elements extractTeamLinks() {
+		Elements elements = 
+				getElementsByAttributeValueEqualing(TEAM_NAME_ATTRIBUTE_KEY, TEAM_NAME_ATTRIBUTE_VALUE);
+		elements = filterElementsByTag(elements, "a");
+		return elements;
+	}
+	
+	// can remove
 	public Map<String, Integer> getScore() {
 		Map<String, Integer> scoreMap = new HashMap<>();
 		Elements elements = elementsByClass(GAME_SCORE_CLASS);
@@ -85,6 +103,12 @@ public class GamePageDocument extends JsoupExtractor {
 		return scoreMap;
 	}
 	
+	public Elements extractGameScoreElements() {
+		Elements scoreElements = elementsByClass(GAME_SCORE_CLASS);
+		return scoreElements;
+	}
+	
+	// can remove
 	public LocalTime getGameTime() {
 		Elements els = getElementsWithOwnTextMatchingRegex(GAME_TIME_REGEX);
 		try {
@@ -96,6 +120,13 @@ public class GamePageDocument extends JsoupExtractor {
 		}
 	}
 	
+	public Element getGameTimeElement() {
+		Elements elements = getElementsWithOwnTextMatchingRegex(GAME_TIME_REGEX);
+		Element element = elements.get(0);
+		return element;
+	}
+	
+	// can remove
 	public LocalDate getGameDate() {
 		Elements els = getElementsWithOwnTextMatchingRegex(GAME_DATE_REGEX);
 		try {
@@ -107,6 +138,13 @@ public class GamePageDocument extends JsoupExtractor {
 		}
 	}
 	
+	public Element getGameDateElement() {
+		Elements elements = getElementsWithOwnTextMatchingRegex(GAME_DATE_REGEX);
+		Element element = elements.get(0);
+		return element;
+	}
+	
+	// can remove
 	private String convertFullTeamNameToNickname(Element e) {
 		String full = e.text();
 		String[] fullArr = full.split(" ");
@@ -114,6 +152,7 @@ public class GamePageDocument extends JsoupExtractor {
 		return name;
 	}
 	
+	// can remove
 	private int getWeekNumFromAttributeValue(Element e) {
 		Attributes attributes = getAttributesBelongingTo(e);
 		for (Attribute a : attributes) {
@@ -126,6 +165,7 @@ public class GamePageDocument extends JsoupExtractor {
 		return -1;
 	}
 	
+	// can remove
 	private LocalTime convertElementTextToTime(String text) throws Exception {
 		text = text.replace("Start Time: ",  "").trim();
 		if (!text.contains(":"))
@@ -139,6 +179,7 @@ public class GamePageDocument extends JsoupExtractor {
 		return time;
 	}
 	
+	// can remove
 	private LocalDate convertElementTextToDate(String date) throws Exception {
 		if (date.contains(":"))
 			throw new Exception(String.format("The text: %s is invalid and can't be converted to a date.", date));
@@ -151,6 +192,7 @@ public class GamePageDocument extends JsoupExtractor {
 		return d;
 	}
 	
+	// can remove
 	public Map<String, GameStats> getGameStats() {
 		Map<String, GameStats> map = new HashMap<>();
 		Document table = Jsoup.parse(this.comments.get(0).getData());
@@ -178,11 +220,19 @@ public class GamePageDocument extends JsoupExtractor {
 		return map;
 	}
 	
+	public Elements extractGameStatsRows() {
+		Document table = Jsoup.parse(this.comments.get(0).getData());
+		Elements rows = table.getElementsByTag("tr");
+		return rows;
+	}
+	
+	// can remove
 	public String getPlayerNameFromRow(Element e) {
 		String[] nameArr = e.select("a[href]").text().split(" ");
 		return nameArr[0] + " " + nameArr[1];
 	}
 	
+	// can remove
 	private boolean isPlayerRow(Element e) {
 		Elements cells = e.getElementsByTag("td");
 		String[] nameArr = e.select("a[href]").text().split(" ");
@@ -195,10 +245,12 @@ public class GamePageDocument extends JsoupExtractor {
 		return e.getElementsByTag("tr");
 	}
 	
-	private Elements getAllCellsFromRow(Element e) {
-		return e.getElementsByTag("td");
+	// pick up here -> this method can stay
+	private Elements getAllCellsFromRow(Element row) {
+		return row.getElementsByTag("td");
 	}
 	
+	// can remove
 	private GameStats getGameStatsFromRow(Element row) throws Exception { 
 		if (!isPlayerRow(row))
 			throw new Exception("This row: " + row + " is not a player row.");
