@@ -1,6 +1,8 @@
 package com.jsull.entity;
 
-public class GameStats {
+import java.io.Serializable;
+
+public class GameStats implements Serializable {
 
 	private long id;
 	private int passCompletions;
@@ -23,9 +25,10 @@ public class GameStats {
 	private int fumbles;
 	private int fumblesLost;
 	private Game game;
-	private Team team;
+	private String team;
 	private RushDetails rushDetails;
 	private PassDetails passDetails;
+	private SnapDetails snapDetails;
 	
 	public GameStats() {}
 
@@ -92,12 +95,15 @@ public class GameStats {
 	public Game getGame() { return game; }
 	public void setGame(Game game) { this.game = game; }
 	
-	public Team getTeam() { return team; }
-	public void setTeam(Team team) { this.team = team; }
+	public String getTeam() { return team; }
+	public void setTeam(String team) { this.team = team; }
 	
 	public RushDetails getRushDetails() { return this.rushDetails; }
 	public void setRushDetails(RushDetails rushDetails) { this.rushDetails = rushDetails; }
 	
 	public PassDetails getPassDetails() { return this.passDetails; }
 	public void setPassDetails(PassDetails passDetails) { this.passDetails = passDetails; } 
+	
+	public SnapDetails getSnapDetails() { return this.snapDetails; }
+	public void setSnapDetails(SnapDetails snapDetails) { this.snapDetails = snapDetails; }
 }

@@ -15,4 +15,15 @@ public class StringUtils {
 		String[] arr = text.split(splitter);
 		return arr;
 	}
+	
+	public static String generateCSSQueryFromAttrKeyAndVal(String tag, String key, String val) {
+		String query = String.format("%s[%s=%s]", tag, key, val);
+		return query;
+	}
+	
+	public static int parsePctFromString(String string) {
+		string = string.replace("%", "");
+		int n = Integer.parseInt(string);
+		return n;
+	}
 }

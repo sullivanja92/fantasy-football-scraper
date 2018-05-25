@@ -1,8 +1,9 @@
 package com.jsull.entity;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Team {
+public class Team implements Serializable {
 	
 	private String name;
 	private String location;

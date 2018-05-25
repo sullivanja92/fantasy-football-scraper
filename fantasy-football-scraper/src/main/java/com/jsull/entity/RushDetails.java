@@ -1,6 +1,8 @@
 package com.jsull.entity;
 
-public class RushDetails {
+import java.io.Serializable;
+
+public class RushDetails implements Serializable {
 	
 	private long id;
 	private int rushAttLeftEnd;

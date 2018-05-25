@@ -1,4 +1,4 @@
-package com.jsull.fantasy_football_scraper;
+package com.jsull;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

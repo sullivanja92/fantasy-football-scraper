@@ -8,24 +8,31 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Attribute;
-import org.jsoup.nodes.Attributes;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.jsull.document.extractor.GamePageDocumentExtractor;
 import com.jsull.entity.Game;
 import com.jsull.entity.GameStats;
+import com.jsull.entity.PassDetails;
+import com.jsull.entity.RushDetails;
+import com.jsull.entity.SnapDetails;
 import com.jsull.util.StringUtils;
 
+/**
+ * 
+ * @author Josh Sullivan
+ *
+ */
 public class GamePageDocumentParser {
+	
+	//private static final Logger log = LogManager.getLogManager().getLogger(GamePageDocumentParser.class.getName());
 	
 	private GamePageDocumentExtractor extractor;
 	
 	public static final String GAME_WEEK_LABEL = "data-label";
 	public static final String PLAYER_NAME_QUERY = "a[href]";
+	public static final String GAME_STATS_LABEL = "data-stat";
 	
 	public GamePageDocumentParser(String url) {
 		extractor = new GamePageDocumentExtractor(url);
@@ -144,6 +151,7 @@ public class GamePageDocumentParser {
 			try {
 				name = getPlayerNameFromRow(row);
 				gameStats = getGameStatsFromRow(row);
+				gameStats.setTeam(currentTeam);
 			} catch (Exception ex) {
 				System.err.println(ex.getMessage());
 			}
@@ -173,11 +181,11 @@ public class GamePageDocumentParser {
 	private GameStats getGameStatsFromRow(Element row) throws Exception { 
 		if (!isPlayerRow(row))
 			throw new Exception("This row: " + row + " is not a player row.");
-		Elements cells = getAllCellsFromRow(row);
+		Elements cells = this.extractor.extractAllCellsFromRow(row);
 		GameStats stats = new GameStats();
 		for (Element c : cells) {
-			Attributes a = c.attributes();
-			String data = a.get("data-stat");
+			String data = 
+					this.extractor.getAttributeFromElementByName(c, GAME_STATS_LABEL).getValue();
 			int val = 0;
 			try {
 				val = Integer.parseInt(c.text());
@@ -185,63 +193,63 @@ public class GamePageDocumentParser {
 				continue;
 			}
 			switch (data) {
-			case "pass_cmp" :
-				stats.setPassCompletions(val);
-				break;
-			case "pass_att":
-				stats.setPassAttempts(val);
-				break;
-			case "pass_yds":
-				stats.setPassYards(val);
-				break;
-			case "pass_td":
-				stats.setPassTouchdowns(val);
-				break;
-			case "pass_int":
-				stats.setInterceptions(val);
-				break;
-			case "pass_sacked":
-				stats.setSacksTaken(val);
-				break;
-			case "pass_sacked_yds":
-				stats.setSackYards(val);
-				break;
-			case "pass_long":
-				stats.setPassLong(val);
-				break;
-			case "rush_Att":
-				stats.setRushAttempts(val);
-				break;
-			case "rush_yds":
-				stats.setRushYards(val);
-				break;
-			case "rush_td":
-				stats.setRushTouchdowns(val);
-				break;
-			case "rush_long":
-				stats.setRushLong(val);
-				break;
-			case "targets":
-				stats.setTargets(val);
-				break;
-			case "rec":
-				stats.setReceptions(val);
-				break;
-			case "rec_yds":
-				stats.setReceptionYards(val);
-				break;
-			case "rec_td":
-				stats.setReceptionTouchdowns(val);
-				break;
-			case "rec_long":
-				stats.setReceptionLong(val);
-				break;
-			case "fumbles":
-				stats.setFumbles(val);
-				break;
-			case "fumbles_lost":
-				stats.setFumblesLost(val);
-				break;
+				case "pass_cmp" :
+					stats.setPassCompletions(val);
+					break;
+				case "pass_att":
+					stats.setPassAttempts(val);
+					break;
+				case "pass_yds":
+					stats.setPassYards(val);
+					break;
+				case "pass_td":
+					stats.setPassTouchdowns(val);
+					break;
+				case "pass_int":
+					stats.setInterceptions(val);
+					break;
+				case "pass_sacked":
+					stats.setSacksTaken(val);
+					break;
+				case "pass_sacked_yds":
+					stats.setSackYards(val);
+					break;
+				case "pass_long":
+					stats.setPassLong(val);
+					break;
+				case "rush_Att":
+					stats.setRushAttempts(val);
+					break;
+				case "rush_yds":
+					stats.setRushYards(val);
+					break;
+				case "rush_td":
+					stats.setRushTouchdowns(val);
+					break;
+				case "rush_long":
+					stats.setRushLong(val);
+					break;
+				case "targets":
+					stats.setTargets(val);
+					break;
+				case "rec":
+					stats.setReceptions(val);
+					break;
+				case "rec_yds":
+					stats.setReceptionYards(val);
+					break;
+				case "rec_td":
+					stats.setReceptionTouchdowns(val);
+					break;
+				case "rec_long":
+					stats.setReceptionLong(val);
+					break;
+				case "fumbles":
+					stats.setFumbles(val);
+					break;
+				case "fumbles_lost":
+					stats.setFumblesLost(val);
+					break;
 			}
 		}
 		return stats;
@@ -254,5 +262,225 @@ public class GamePageDocumentParser {
 		if (cells.size() == 0 || nameArr.length != 2)
 			return false;
 		return true;
+	}
+	
+
+	
+	public Map<String, RushDetails> extractPlayerRushDetails() {
+		Elements rows = this.extractor.extractRushDetailsTableRows();
+		Map<String, RushDetails> map = new HashMap<>();
+		for (Element row : rows) {
+			if (isPlayerRow(row)) {
+				String name = getPlayerNameFromRow(row);
+				RushDetails rushDetails = new RushDetails();
+				Elements cells= this.extractor.extractAllCellsFromRow(row);
+				for (Element cell : cells) {
+					if (!cellIsValid(cell))
+						continue;
+					int val = Integer.parseInt(cell.text());
+					String data = 
+							this.extractor.getAttributeFromElementByName(cell, GAME_STATS_LABEL).getValue();
+					switch (data) {
+						case "rush_le":
+							rushDetails.setRushAttLeftEnd(val);
+							break;
+						case "rush_yds_le":
+							rushDetails.setRushYardsLeftEnd(val);
+							break;
+						case "rush_td_le":
+							rushDetails.setRushTdLeftEnd(val);
+							break;
+						case "rush_lt":
+							rushDetails.setRushAttLeftTackle(val);
+							break;
+						case "rush_yds_lt":
+							rushDetails.setRushYardsLeftTackle(val);
+							break;
+						case "rush_td_lt":
+							rushDetails.setRushTdLeftTackle(val);
+							break;
+						case "rush_lg":
+							rushDetails.setRushAttLeftGuard(val);
+							break;
+						case "rush_yds_lg":
+							rushDetails.setRushYardsLeftGuard(val);
+							break;
+						case "rush_td_lg":
+							rushDetails.setRushTdLeftGuard(val);
+							break;
+						case "rush_md":
+							rushDetails.setRushAttMid(val);
+							break;
+						case "rush_yds_md":
+							rushDetails.setRushYardsMid(val);
+							break;
+						case "rush_td_md":
+							rushDetails.setRushTdMid(val);
+							break;
+						case "rush_rg":
+							rushDetails.setRushAttRightGuard(val);
+							break;
+						case "rush_yds_rg":
+							rushDetails.setRushYardsRightGuard(val);
+							break;
+						case "rush_td_rg":
+							rushDetails.setRushTdRightGuard(val);
+							break;
+						case "rush_rt":
+							rushDetails.setRushAttRightTackle(val);
+							break;
+						case "rush_yds_rt":
+							rushDetails.setRushYardsRightTackle(val);
+							break;
+						case "rush_td_rt":
+							rushDetails.setRushTdRightTackle(val);
+							break;
+						case "rush_re":
+							rushDetails.setRushAttRightEnd(val);
+							break;
+						case "rush_yds_re":
+							rushDetails.setRushYardsRightEnd(val);
+							break;
+						case "rush_td_re":
+							rushDetails.setRushTdRightEnd(val);
+							break;
+					}
+				}
+				map.put(name, rushDetails);
+			}
+		}
+		return map;
+	}
+	
+	public static boolean cellIsValid(Element cell) {
+		return cell.hasText() && isCellValueNumeric(cell);
+	}
+	
+	public static boolean isCellValueNumeric(Element e) {
+		try {
+			Integer.parseInt(e.text());
+			return true;
+		} catch (NumberFormatException ex) {
+			return false;
+		}
+	}
+	
+	public Map<String, PassDetails> extractPlayerPassDetails() {
+		Elements rows = this.extractor.extractPassDetailsTableRows();
+		Map<String, PassDetails> map = new HashMap<>();
+		for (Element row : rows) {
+			if (isPlayerRow(row)) {
+				String name = getPlayerNameFromRow(row);
+				PassDetails passDetails = new PassDetails();
+				Elements cells = this.extractor.extractAllCellsFromRow(row);
+				for (Element cell : cells ) {
+					if (!cellIsValid(cell))
+						continue;
+					int val = Integer.parseInt(cell.text());
+					String data = 
+							this.extractor.getAttributeFromElementByName(cell, GAME_STATS_LABEL).getValue();
+					switch(data) {
+						case "rec_targets_sl":
+							passDetails.setRecTargetsShortLeft(val);
+							break;
+						case "rec_catches_sl":
+							passDetails.setRecCatchesShortLeft(val);
+							break;
+						case "rec_yds_sl":
+							passDetails.setRecYardsShortLeft(val);
+							break;
+						case "rec_td_sl":
+							passDetails.setRecTdShortLeft(val);
+							break;
+						case "rec_targets_sm":
+							passDetails.setRecTargetsShortMiddle(val);
+							break;
+						case "rec_catches_sm":
+							passDetails.setRecCatchesShortMiddle(val);
+							break;
+						case "rec_yds_sm":
+							passDetails.setRecYardsShortMiddle(val);
+							break;
+						case "rec_td_sm":
+							passDetails.setRecTdShortMiddle(val);
+							break;
+						case "rec_targets_sr":
+							passDetails.setRecTargetsShortRight(val);
+							break;
+						case "rec_catches_sr":
+							passDetails.setRecCatchesShortRight(val);
+							break;
+						case "rec_yds_sr":
+							passDetails.setRecYardsShortRight(val);
+							break;
+						case "rec_td_sr":
+							passDetails.setRecTdShortRight(val);
+							break;
+						case "rec_targets_dl":
+							passDetails.setRecTargetsDeepLeft(val);
+							break;
+						case "rec_catches_dl":
+							passDetails.setRecCatchesDeepLeft(val);
+							break;
+						case "rec_yds_dl":
+							passDetails.setRecYardsDeepLeft(val);
+							break;
+						case "rec_td_dl":
+							passDetails.setRecTdDeepLeft(val);
+							break;
+						case "rec_targets_dm":
+							passDetails.setRecTargetsDeepMiddle(val);
+							break;
+						case "rec_catches_dm":
+							passDetails.setRecCatchesDeepMiddle(val);
+							break;
+						case "rec_yds_dm":
+							passDetails.setRecYardsDeepMiddle(val);
+							break;
+						case "rec_td_dm":
+							passDetails.setRecTdDeepMiddle(val);
+							break;
+						case "rec_targets_dr":
+							passDetails.setRecTargetsDeepRight(val);
+							break;
+						case "rec_catches_dr":
+							passDetails.setRecCatchesDeepRight(val);
+							break;
+						case "rec_yds_dr":
+							passDetails.setRecYardsDeepRight(val);
+							break;
+						case "rec_td_dr":
+							passDetails.setRecTdDeepRight(val);
+							break;
+					}
+				}
+				map.put(name, passDetails);
+			}
+		}
+		return map;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public Map<String, SnapDetails> extractSnapDetails() {
+		Elements rows = this.extractor.extractSnapDetailsTableRows();
+		Map<String, SnapDetails> map = new HashMap<>();
+		for (Element row : rows) {
+			String name = getPlayerNameFromRow(row);
+			Element snapNumEl = this.extractor.extractSnapNumCellFromRow(row);
+			int numSnaps = Integer.parseInt(snapNumEl.text());
+			if (numSnaps <= 0)
+				continue;
+			Element snapPctEl = this.extractor.extractSnapPercentageCellFromRow(row);
+			String snapPctText = snapPctEl.text();
+			int snapPercent = StringUtils.parsePctFromString(snapPctText);
+			SnapDetails snapDetails = new SnapDetails();
+			snapDetails.setNumSnaps(numSnaps);
+			snapDetails.setSnapPercentage(snapPercent);
+			map.put(name, snapDetails);
+		}
+		return map;
 	}
 }

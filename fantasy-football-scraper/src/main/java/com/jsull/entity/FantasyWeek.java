@@ -1,6 +1,8 @@
 package com.jsull.entity;
 
-public class FantasyWeek {	
+import java.io.Serializable;
+
+public class FantasyWeek implements Serializable {	
 	
 	private long id;
 	private double draftkingsSalary;

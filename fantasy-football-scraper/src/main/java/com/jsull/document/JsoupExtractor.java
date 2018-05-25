@@ -20,8 +20,7 @@ import org.jsoup.select.Elements;
 public abstract class JsoupExtractor {
 	
 	protected Document doc;
-	public static final String USER_AGENT_HEADER = "Mozilla/5.0 (Windows NT 6.1; WOW64) "
-			+ "AppleWebKit/537.36 (KHTML, linke Gecko) Chrome/62.0.3202.75 Safari/537.36";
+	public static final String USER_AGENT_HEADER = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36";
 	
 	public JsoupExtractor(String url) {
 		try {

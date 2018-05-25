@@ -1,6 +1,8 @@
 package com.jsull.entity;
 
-public class PassDetails {
+import java.io.Serializable;
+
+public class PassDetails implements Serializable {
 	
 	private long id;
 	private int recTargetsShortLeft;

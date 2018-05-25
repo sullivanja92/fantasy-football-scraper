@@ -1,6 +1,10 @@
 package com.jsull.page;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -17,6 +21,13 @@ public abstract class Page {
 	private WebDriverWait wait;
 	
 	public Page(WebDriver driver) {
+		Properties props = new Properties();
+		String driverPath = null;
+		try {
+			props.load(new FileInputStream(new File("Resources/application.properties")));
+			driverPath = props.getProperty("chromedriverPath");
+		} catch (Exception e) {}
+		System.setProperty("webdriver.chrome.driver", driverPath);
 		this.driver = driver;
 		this.wait = new WebDriverWait(this.driver, 30);
 	}
@@ -56,6 +67,18 @@ public abstract class Page {
 		return select;
 	}
 	
+	public void clickSelectWithXpathByTextContaining(String xpath, String text) {
+		Select select = new Select(this.driver.findElement(By.xpath(xpath)));
+		List<WebElement> elements = select.getOptions();
+		for (WebElement option : elements) {
+			String displayedText = option.getText();
+			if (displayedText.contains(text)) {
+				option.click();
+				return;
+			}
+		}
+	}
+	
 	public ArrayList<WebElement> collectElementsByXpath(String xpath) {
 		return (ArrayList<WebElement>) wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.xpath(xpath)));
 	}
@@ -71,7 +94,17 @@ public abstract class Page {
 			driver.findElement(By.xpath(xpath));
 			return true;
 		} catch (NoSuchElementException e) {
-			System.err.println(String.format("xpath: %s is not located on the page", xpath));
+			//System.err.println(String.format("xpath: %s is not located on the page", xpath));
+		}
+		return false;
+	}
+	
+	public boolean checkPresenceInElementByXpath(WebElement element, String xpath) {
+		try {
+			element.findElement(By.xpath(xpath));
+			return true;
+		} catch (NoSuchElementException e) {
+			//System.err.println(String.format("xpath: %s is not located on the page", xpath));
 		}
 		return false;
 	}

@@ -1,4 +1,4 @@
-package com.jsull.fantasy_football_scraper;
+package com.jsull;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
