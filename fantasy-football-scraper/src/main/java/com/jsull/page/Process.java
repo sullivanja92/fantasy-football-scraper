@@ -20,16 +20,12 @@ import com.jsull.entity.PassDetails;
 import com.jsull.entity.Player;
 import com.jsull.entity.RushDetails;
 import com.jsull.entity.SnapDetails;
+import com.jsull.util.EntityWriter;
 import com.jsull.util.PlayerDataUtils;
 import com.jsull.util.SqlGenerator;
+import com.jsull.util.EntityWriter.EntityType;
 
 public class Process {
-	
-	
-	// todo: add player_id to game_stats
-		// edit fantasyweek sql method
-	
-	
 	
 	public String getEspnLinkForPlayer(String first, String last) {
 		Player p = new Player();
@@ -42,10 +38,10 @@ public class Process {
 	
 	public static void main(String[] args) {
 		System.setProperty("webdriver.chrome.driver", "Resources/chromedriver");
-		scrapePlayerData(1, 1);
+		scrapePlayerData(2017, 1, 1, 1);
 	}
 	
-	public static void scrapePlayerData(int startWeek, int numWeeks) { // include year
+	public static void scrapePlayerData(int year, int numYears, int startWeek, int numWeeks) { 
 		
 		StringBuilder playerBuilder = new StringBuilder();
 		StringBuilder gameBuilder = new StringBuilder();
@@ -55,16 +51,15 @@ public class Process {
 		StringBuilder passDetailsBuilder = new StringBuilder();
 		StringBuilder snapDetailsBuilder = new StringBuilder();
 		
-		// can comment out once have all players wanted
+		//////////////////////////////////////////////////////////////////////// can comment out once have all players wanted
 		FantasyWeekPage fwp = new FantasyWeekPage(new ChromeDriver());
 		Map<String, Player> players = fwp.scrapePlayerData(startWeek, numWeeks);
 		String playersFileName = PlayerDataUtils.serializePlayers(players);
 		System.out.println(String.format("%d players scraped.", players.size()));
-		//////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//String playersFileName = xxxxxxx;
 		//Map<String, Player> players = PlayerDataUtils.readSerializedPlayers(playersFileName);
-		
-		// can comment out once have links
+		/////////////////////////////////////////////////////////////////////// can comment out once have links
 		Map<String, String> espnLinkMap = new HashMap<>();
 		for (Map.Entry<String, Player> entry : players.entrySet()) {
 			Player p = entry.getValue();
@@ -78,11 +73,8 @@ public class Process {
 			} catch(Exception e) {}
 		}
 		String espnLinkFileName = PlayerDataUtils.serializeLinks(espnLinkMap);
-		///////////////////////////
-		
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//String espnLinkFileName = xxxxxxx;
-		
-		
 		Map<String, String> links = PlayerDataUtils.readSerializedLinks(espnLinkFileName);
 		for (Map.Entry<String, Player> entry : players.entrySet()) {
 			String name = entry.getKey();
@@ -96,10 +88,12 @@ public class Process {
 		}
 		
 		List<String> gameUrls = new ArrayList<>();
-		for (int i=startWeek; i<startWeek+numWeeks; i++)  {
-			String gameListUrl = GameListPageDocumentParser.getGameListUrlByYearAndWeek(2017, i);
-			GameListPageDocumentParser gameListPage = new GameListPageDocumentParser(gameListUrl);
-			gameUrls.addAll(gameListPage.getGameUrls());
+		for (int j=year; j<year+numYears; j++) {
+			for (int i=startWeek; i<startWeek+numWeeks; i++)  {
+				String gameListUrl = GameListPageDocumentParser.getGameListUrlByYearAndWeek(j, i);
+				GameListPageDocumentParser gameListPage = new GameListPageDocumentParser(gameListUrl);
+				gameUrls.addAll(gameListPage.getGameUrls());
+			}
 		}
 		
 		for (String gameUrl : gameUrls) {
@@ -132,7 +126,7 @@ public class Process {
 				
 				// edit this method
 				fantasyWeekBuilder.append(SqlGenerator.generateSqlForFantasyWeek(p, game));
-				gameStatsBuilder.append(SqlGenerator.generateSqlForGameStats(gs, game)); // will need player
+				gameStatsBuilder.append(SqlGenerator.generateSqlForGameStats(gs, game, p)); 
 
 				if (rushDetailsMap.containsKey(playerName)) {
 					RushDetails rd = rushDetailsMap.get(playerName);
@@ -159,8 +153,14 @@ public class Process {
 			}
 		}
 		// write sql builders to output folder
-		
-		PlayerDataUtils.serializePlayers(players);
+		EntityWriter.write(playerBuilder, EntityType.PLAYER);
+		EntityWriter.write(gameBuilder, EntityType.GAME);
+		EntityWriter.write(fantasyWeekBuilder, EntityType.FANTASY_WEEK);
+		EntityWriter.write(gameStatsBuilder, EntityType.GAME_STATS);
+		EntityWriter.write(rushDetailsBuilder, EntityType.RUSH_DETAILS);
+		EntityWriter.write(passDetailsBuilder, EntityType.PASS_DETAILS);
+		EntityWriter.write(snapDetailsBuilder, EntityType.SNAP_DETAILS);
+		//PlayerDataUtils.serializePlayers(players);
 	}
 
 }

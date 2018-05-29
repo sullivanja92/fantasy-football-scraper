@@ -54,7 +54,7 @@ public class GamePageDocumentParser {
 	
 	public int getGameWeek() {
 		Elements els = this.extractor.getGameWeekElements();
-		String data = this.extractor.getAttributeValueBelongingTo(els.get(0), GAME_WEEK_LABEL);
+		String data = this.extractor.attributeValueFromElement(els.get(0), GAME_WEEK_LABEL);
 		return parseWeekNumFromAttributeValue(data);
 	}
 	
@@ -167,7 +167,7 @@ public class GamePageDocumentParser {
 	}
 	
 	public String getPlayerNameFromRow(Element e) {
-		Elements elements = this.extractor.selectFromElementByQuery(e, PLAYER_NAME_QUERY);
+		Elements elements = this.extractor.elementsFromElementByQuery(e, PLAYER_NAME_QUERY);
 		String[] nameArr = getNameArrFromLinks(elements);
 		return nameArr[0] + " " + nameArr[1];
 	}
@@ -185,7 +185,7 @@ public class GamePageDocumentParser {
 		GameStats stats = new GameStats();
 		for (Element c : cells) {
 			String data = 
-					this.extractor.getAttributeFromElementByName(c, GAME_STATS_LABEL).getValue();
+					this.extractor.attributeFromElementByName(c, GAME_STATS_LABEL).getValue();
 			int val = 0;
 			try {
 				val = Integer.parseInt(c.text());
@@ -257,7 +257,7 @@ public class GamePageDocumentParser {
 	
 	private boolean isPlayerRow(Element e) {
 		Elements cells = e.getElementsByTag("td");
-		Elements elements = this.extractor.selectFromElementByQuery(e, PLAYER_NAME_QUERY);
+		Elements elements = this.extractor.elementsFromElementByQuery(e, PLAYER_NAME_QUERY);
 		String[] nameArr = getNameArrFromLinks(elements);
 		if (cells.size() == 0 || nameArr.length != 2)
 			return false;
@@ -279,7 +279,7 @@ public class GamePageDocumentParser {
 						continue;
 					int val = Integer.parseInt(cell.text());
 					String data = 
-							this.extractor.getAttributeFromElementByName(cell, GAME_STATS_LABEL).getValue();
+							this.extractor.attributeFromElementByName(cell, GAME_STATS_LABEL).getValue();
 					switch (data) {
 						case "rush_le":
 							rushDetails.setRushAttLeftEnd(val);
@@ -378,7 +378,7 @@ public class GamePageDocumentParser {
 						continue;
 					int val = Integer.parseInt(cell.text());
 					String data = 
-							this.extractor.getAttributeFromElementByName(cell, GAME_STATS_LABEL).getValue();
+							this.extractor.attributeFromElementByName(cell, GAME_STATS_LABEL).getValue();
 					switch(data) {
 						case "rec_targets_sl":
 							passDetails.setRecTargetsShortLeft(val);

@@ -23,24 +23,24 @@ public class EspnPlayerPageDocumentExtractor extends JsoupExtractor {
 	
 	public Element getHeightWeightRow() {
 		Elements elements = elementsByClass(GENERAL_INFO_CLASS);
-		Element e = getChildElementContainingText(elements, HEIGHT_WEIGHT_ROW_TERM);
+		Element e = childElementFromElementsContainingText(elements, HEIGHT_WEIGHT_ROW_TERM);
 		return e;
 	}
 	
 	public Element getCollegeRow() {
 		Elements elements = elementsByClass(PLAYER_METADATA_CLASS);
-		Element e = getChildElementContainingText(elements, COLLEGE_ROW_TERM);
+		Element e = childElementFromElementsContainingText(elements, COLLEGE_ROW_TERM);
 		return e;
 	}
 	
 	public Element getNumberRow() {
 		Elements elements = elementsByClass(GENERAL_INFO_CLASS);
-		Element e = getChildElementByClass(elements, NUMBER_ELEMENT_CLASS);
+		Element e = childElementFromElementsByClass(elements, NUMBER_ELEMENT_CLASS);
 		return e;
 	}
 	
 	public boolean playerHasDraftInfoRow() {
-		Elements draftedRowEls = getElementsByTextEqualTo(PLAYER_DRAFTED_TEXT);
+		Elements draftedRowEls = elementsByTextEqualTo(PLAYER_DRAFTED_TEXT);
 		Element draftedRowEl = draftedRowEls.get(0);
 		String content = draftedRowEl.text();
 		if (content.contains("{") || content.contains("\""))
@@ -49,14 +49,14 @@ public class EspnPlayerPageDocumentExtractor extends JsoupExtractor {
 	}
 	
 	public Element getPlayerDraftInfoRow() {
-		Elements children = getElementsByTextEqualTo(PLAYER_DRAFTED_TEXT);
+		Elements children = elementsByTextEqualTo(PLAYER_DRAFTED_TEXT);
 		Element child = children.get(0);
 		Element parent = child.parent();
 		return parent;
 	}
 	
 	public Element getBirthDateRow() {
-		Element birthDateRow = getParentByCSSQuery(BIRTH_DATE_QUERY);
+		Element birthDateRow = parentOfElementByQuery(BIRTH_DATE_QUERY);
 		return birthDateRow;
 	}
 	
@@ -64,6 +64,6 @@ public class EspnPlayerPageDocumentExtractor extends JsoupExtractor {
 		Elements imgElements = elementsByClass(IMAGE_PARENT_CLASS);
 		Element imgEl = imgElements.get(0);
 		Element img = imgEl.child(0);
-		return getAttributeFromElementByName(img, "src");
+		return attributeFromElementByName(img, "src");
 	}
 }

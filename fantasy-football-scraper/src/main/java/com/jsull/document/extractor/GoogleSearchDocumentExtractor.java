@@ -23,13 +23,13 @@ public class GoogleSearchDocumentExtractor extends JsoupExtractor {
 	}
 
 	public String getEspnLinkForPlayer(Player p) {		// may be removed
-		Elements elements = getByTag(URL_SEARCH_TAG);
+		Elements elements = elementsByTag(URL_SEARCH_TAG);
 		String link = findEspnLink(elements);
 		return link;
 	}
 	
 	public String getEspnLinkForPlayer() {
-		Elements elements = getByTag(URL_SEARCH_TAG);
+		Elements elements = elementsByTag(URL_SEARCH_TAG);
 		String link = findEspnLink(elements);
 		System.out.println("Link to espn page: " + link);
 		return link;
@@ -37,7 +37,7 @@ public class GoogleSearchDocumentExtractor extends JsoupExtractor {
 	
 	public String findEspnLink(Elements links) {
 		for (Element link : links) {
-			String href = getAttributeValueBelongingTo(link, "href");
+			String href = attributeValueFromElement(link, "href");
 			if (validEspnLink(href))
 				return href;
 		}

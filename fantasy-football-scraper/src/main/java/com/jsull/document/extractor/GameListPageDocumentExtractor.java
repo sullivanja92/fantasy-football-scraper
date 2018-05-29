@@ -19,12 +19,12 @@ public class GameListPageDocumentExtractor extends JsoupExtractor {
 		Elements boxScoreElements = getGameBoxScoreElements();
 		Elements linkElements = filterElementsByTag(boxScoreElements, "a");
 		List<Attribute> hrefAttributes = 
-				extractAttributesFromElementsByName(linkElements, "href");
+				attributesFromElementsByName(linkElements, "href");
 		return hrefAttributes;
 	}
 	
 	public Elements getGameBoxScoreElements() {
-		Elements boxScoreElements = getElementsByTextEqualTo(GAME_LINK_LOCATOR);
+		Elements boxScoreElements = elementsByTextEqualTo(GAME_LINK_LOCATOR);
 		return boxScoreElements;
 	}
 }

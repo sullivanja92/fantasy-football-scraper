@@ -57,23 +57,26 @@ public class SqlGenerator {
 		p.setFirst("josh");p.setLast("Sullivan");p.setPosition("RB");p.setFeet(6);p.setInches(2);p.setWeight(250);
 		p.setCollege("UW-Whitewater");p.setNumber(44);p.setDraftYear(2018);p.setDraftRound(1);p.setDraftPick(25);
 		p.setDraftTeam("GB");p.setBirthDate(LocalDate.now());p.setImageUrl("my_image_url");
+		String psql = generateSqlForPlayer(p);
+		System.out.println(psql);
 		Game g = new Game();
 		g.setHome("GB");g.setAway("MN");g.setDate(LocalDate.now());g.setTime(LocalTime.now());g.setHomeScore(30);g.setAwayScore(20);g.setWeek(3);
 		String gsql = generateSqlForGame(g);
 		System.out.println(gsql);
 		List<FantasyWeek> fws = new ArrayList<>();
 		FantasyWeek fw1 = new FantasyWeek();
-		fw1.setDraftkingsSalary(6500);fw1.setFanduelSalary(6500);fw1.setYahooSalary(5500);fw1.setWeek(1);fw1.setYear(2017);
+		fw1.setDraftkingsSalary(6500);fw1.setFanduelSalary(6500);fw1.setYahooSalary(5500);fw1.setWeek(3);fw1.setYear(2017);
 		fws.add(fw1);
 		FantasyWeek fw2 = new FantasyWeek();
 		fw2.setDraftkingsSalary(5500);fw2.setFanduelSalary(5500);fw2.setYahooSalary(5500);fw2.setWeek(1);fw2.setYear(2017);
 		fws.add(fw2);
 		p.setFantasyWeeks(fws);
 		String sql = generateSqlForFantasyWeek(p, g);
+		System.out.println(sql);
 		GameStats gs = new GameStats();
 		gs.setPassAttempts(35);gs.setPassYards(300);gs.setPassTouchdowns(3);gs.setPassCompletions(30);gs.setRushAttempts(10);
-		gs.setRushYards(30);gs.setFumbles(1);gs.setSacksTaken(4);gs.setSackYards(10);
-		sql = generateSqlForGameStats(gs, g);
+		gs.setRushYards(30);gs.setFumbles(1);gs.setSacksTaken(4);gs.setSackYards(10);gs.setTeam("Packers");
+		sql = generateSqlForGameStats(gs, g, p);
 		System.out.println(sql);
 		PassDetails pd = new PassDetails();
 		sql = generateSqlForPassDetails(pd, g);
@@ -115,20 +118,22 @@ public class SqlGenerator {
 		return sql;
 	}
 	
-	public static String generateSqlForGameStats(GameStats gs, Game g) {
+	public static String generateSqlForGameStats(GameStats gs, Game g, Player p) {
 		if (gs == null)
 			return "";
 		String sql = String.format("INSERT INTO `%s` "
 				+ "(pass_completions, pass_attempts, pass_yards, pass_touchdowns, pass_interceptions, "
 				+ "pass_long, sacks_taken, sack_yards, rush_attempts, rush_yards, rush_touchdowns, rush_long, "
-				+ "targets, receptions, reception_yards, reception_touchdowns, reception_long, fumbles, fumbles_lost, game_id) "
-				+ "VALUES(%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, "
-				+ "SELECT id FROM `%s` g WHERE YEAR(g.date)=%d AND g.week=%d AND g.home_team='%s');\n"
+				+ "targets, receptions, reception_yards, reception_touchdowns, reception_long, fumbles, fumbles_lost, team, "
+				+ "game_id, player_id) "
+				+ "VALUES(%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, '%s', "
+				+ "SELECT id FROM `%s` g WHERE YEAR(g.date)=%d AND g.week=%d AND g.home_team='%s', "
+				+ "SELECT p.id FROM `%s` p WHERE p.first='%s' AND p.last='%s');\n"
 				, GAME_STATS_TABLE, gs.getPassCompletions(), gs.getPassAttempts(), gs.getPassYards(), gs.getPassTouchdowns(),
 				gs.getInterceptions(), gs.getPassLong(), gs.getSacksTaken(), gs.getSackYards(), gs.getRushAttempts(),
 				gs.getRushYards(), gs.getRushTouchdowns(), gs.getRushLong(), gs.getTargets(), gs.getReceptions(), gs.getReceptionYards(),
-				gs.getReceptionTouchdowns(), gs.getReceptionLong(), gs.getFumbles(), gs.getFumblesLost(), GAME_TABLE,
-				g.getDate().getYear(), g.getWeek(), g.getHome());
+				gs.getReceptionTouchdowns(), gs.getReceptionLong(), gs.getFumbles(), gs.getFumblesLost(), gs.getTeam(), GAME_TABLE,
+				g.getDate().getYear(), g.getWeek(), g.getHome(), PLAYER_TABLE, p.getFirst(), p.getLast());
 		return sql;
 	}
 	

@@ -45,13 +45,13 @@ public class GamePageDocumentExtractor extends JsoupExtractor {
 	}
 	
 	public Elements getGameWeekElements() {
-		Elements els = getElementsByAttributeValueStartingWith("data-label", ELEMENT_WEEK_TEXT);
+		Elements els = elementsByAttributeValueStartingWith("data-label", ELEMENT_WEEK_TEXT);
 		return els;
 	}
 	
 	public Elements extractTeamLinks() {
 		Elements elements = 
-				getElementsByAttributeValueEqualing(TEAM_NAME_ATTRIBUTE_KEY, TEAM_NAME_ATTRIBUTE_VALUE);
+				elementsByAttributeValueEqualing(TEAM_NAME_ATTRIBUTE_KEY, TEAM_NAME_ATTRIBUTE_VALUE);
 		elements = filterElementsByTag(elements, "a");
 		return elements;
 	}
@@ -62,13 +62,13 @@ public class GamePageDocumentExtractor extends JsoupExtractor {
 	}
 	
 	public Element getGameTimeElement() {
-		Elements elements = getElementsWithOwnTextMatchingRegex(GAME_TIME_REGEX);
+		Elements elements = elementsWithOwnTextMatchingRegex(GAME_TIME_REGEX);
 		Element element = elements.get(0);
 		return element;
 	}
 	
 	public Element getGameDateElement() {
-		Elements elements = getElementsWithOwnTextMatchingRegex(GAME_DATE_REGEX);
+		Elements elements = elementsWithOwnTextMatchingRegex(GAME_DATE_REGEX);
 		Element element = elements.get(0);
 		return element;
 	}
@@ -132,7 +132,7 @@ public class GamePageDocumentExtractor extends JsoupExtractor {
 	
 	public Element extractCellFromRowByAttribute(Element row, String attributeKey, String attributeVal) {
 		String query = StringUtils.generateCSSQueryFromAttrKeyAndVal("td", attributeKey, attributeVal);
-		Element cell = selectFromElementByQuery(row, query).get(0);
+		Element cell = elementsFromElementByQuery(row, query).get(0);
 		return cell;
 	}
 }

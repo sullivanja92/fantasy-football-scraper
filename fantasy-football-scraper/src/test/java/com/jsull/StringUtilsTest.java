@@ -5,6 +5,7 @@ import org.junit.Test;
 import com.jsull.util.StringUtils;
 
 public class StringUtilsTest {
+	
 
 	@Test
 	public void testNonDigitsStripped() {
@@ -12,7 +13,7 @@ public class StringUtilsTest {
 		String nonDigitString = StringUtils.stripNonDigits(digitString);
 		String expected = "12345";
 		assert(expected.equals(nonDigitString));
-		System.out.println("Passed testNonDigitsStripped");
+//		System.out.println("Passed testNonDigitsStripped");
 	}
 	
 	@Test
