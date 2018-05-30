@@ -60,16 +60,20 @@ public class Process {
 		//String playersFileName = xxxxxxx;
 		//Map<String, Player> players = PlayerDataUtils.readSerializedPlayers(playersFileName);
 		/////////////////////////////////////////////////////////////////////// can comment out once have links
-		Map<String, String> espnLinkMap = new HashMap<>();
+		
+		
+		Map<String, String> espnLinkMap = new HashMap<>(); // read map here
 		for (Map.Entry<String, Player> entry : players.entrySet()) {
 			Player p = entry.getValue();
+			// surround the following with try / catch
 			GoogleSearchDocumentExtractor gsd = new GoogleSearchDocumentExtractor(p);
 			String espnUrl = gsd.getEspnLinkForPlayer();
 			String name = p.getFirst() + " " + p.getLast();
 			espnLinkMap.put(name, espnUrl);
+			// write map to file here
 			System.out.println("Espn URL: " + espnUrl + " for player: " + name);
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(3000);
 			} catch(Exception e) {}
 		}
 		String espnLinkFileName = PlayerDataUtils.serializeLinks(espnLinkMap);
